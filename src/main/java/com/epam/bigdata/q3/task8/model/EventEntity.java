@@ -19,7 +19,9 @@ public class EventEntity implements Serializable{
 	
 	private String name;
 	
-	private int attendingCount;
+    private int attendingCount;
+    
+    private List<AttendeeData> attendees;
 
 	private String tag;
 	
@@ -31,12 +33,14 @@ public class EventEntity implements Serializable{
 		super();
 	}
 
-	public EventEntity(String description, String id, String name, int attendingSum, String tag) {
+	
+	
+public EventEntity(String description, String id, String name, int attendingCount, String tag) {
 		super();
 		this.description = description;
 		this.id = id;
 		this.name = name;
-		this.attendingCount = attendingSum;
+		this.attendingCount = attendingCount;
 		this.tag = tag;
 	}
 
@@ -88,14 +92,6 @@ public class EventEntity implements Serializable{
 		this.tag = tag;
 	}
 
-	public int getAttendingCount() {
-		return attendingCount;
-	}
-
-	public void setAttendingCount(int attendingCount) {
-		this.attendingCount = attendingCount;
-	}
-
 	public List<String> getWordsFromDescription() {
 		return wordsFromDescription;
 	}
@@ -110,6 +106,30 @@ public class EventEntity implements Serializable{
 
 	public void setCountedWords(Map<String, Integer> countedWords) {
 		this.countedWords = countedWords;
+	}
+
+
+
+	public List<AttendeeData> getAttendees() {
+		return attendees;
+	}
+
+
+
+	public void setAttendees(List<AttendeeData> attendees) {
+		this.attendees = attendees;
+	}
+
+
+
+	public int getAttendingCount() {
+		return attendingCount;
+	}
+
+
+
+	public void setAttendingCount(int attendingCount) {
+		this.attendingCount = attendingCount;
 	}
 
 

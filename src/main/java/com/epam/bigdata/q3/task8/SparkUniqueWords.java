@@ -12,12 +12,14 @@ import com.epam.bigdata.q3.task8.model.DateCityTagEntity;
 import com.epam.bigdata.q3.task8.model.EventEntity;
 import com.epam.bigdata.q3.task8.model.TagEventsEntity;
 import com.epam.bigdata.q3.task8.model.ULogEntity;
+import com.epam.bigdata.q3.task8.model.AttendeeData;
 import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
 import com.restfb.Version;
 import com.restfb.types.Event;
+import com.restfb.types.User;
 
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
@@ -42,7 +44,7 @@ public class SparkUniqueWords {
 	private static final String SPLIT = "\\s+";
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("mm.dd.yyyy");
 	
-	private static final String TOKEN = "EAACEdEose0cBAG84qAjolqnwGyyDWWmHIeMNlCi90ZCLrjYs9ZACx3B9SUydYdyDyMW5ZCZABn2rmd28oNBZAftUtz7wc01F4g0Ycs184ZAcvNoAAu7sWY5j6GyNyjRxdgZBMjQqQMrMDrwmW2z1PiwiDOW8pidWaZCynGLEmRvoX7zZCyTpulQW5";
+	private static final String TOKEN = "EAACEdEose0cBAPfNVigCS7QVYW5CJVctaMJyy8S6o3tI6OedsnIvOSBLrfOfuzp3TVWKl4RZBzFrVeB2fsErnbsxwKEZCZCWQhCB75H0pNdlkderXeu9l2Di4DjZCDcAZBYFpA3ectOyaSqDcOWmRD75FDyLtI8tu2ELeUXZAEZCO4jjfJ3gqEi";
 	private static final FacebookClient facebookClient = new DefaultFacebookClient(TOKEN, Version.VERSION_2_5);
     
     
@@ -61,10 +63,12 @@ public class SparkUniqueWords {
 	    	      .builder()
 	    	      .appName("SparkUniqueWords")
 	    	      .getOrCreate();
-	    
-	    //================ 	1. Collect all unique keyword per day per location (city)   ==========================
 
 	    /*
+	     * ----------------------------------------------------------------------------------------------------------
+	     *    1. Collect all unique keyword per day per location (city)
+	     * ----------------------------------------------------------------------------------------------------------
+	     * 
 	     * -------------------- GET TAG_ID + LIST OF TAGS -------------------------
 	     */
         Dataset<String> data = spark.read().textFile(tagFile);
@@ -140,15 +144,6 @@ public class SparkUniqueWords {
                 return set1;
         });
         
-//        JavaPairRDD<DateCityEntity, Set<String>> dateCityTagsPairs = dateCityTags.reduceByKey(new Function2<Set<String>, Set<String>, Set<String>>() {
-//            @Override
-//            public Set<String> call(Set<String> set1, Set<String> set2) {
-//                set1.addAll(set2);
-//                return set1;
-//            }
-//        });
-
-        
         System.out.println("-----------------------UNIQUE KEYWORDS PER DATE/CITY----------------------------");
         for (Tuple2<DateCityEntity, Set<String>> tuple : dateCityTagsPairs.collect()) {
             System.out.println("CITY: " + tuple._1().getCity() + " DATE: " + tuple._1().getDate() + " TAGS: ");
@@ -159,7 +154,18 @@ public class SparkUniqueWords {
             }
         }
 
-      //===========================    2.  FACEBOOK API PART  ========================================================
+      /*
+       * ===========================   FACEBOOK API PART  ==========================================================
+       * 
+       * -----------------------------------------------------------------------------------------------------------
+       * 2.	For each keyword per day per city store information like: 
+       * KEYWORD DAY CITY TOTAL_AMOUNT_OF_VISITORS TOKEN_MAP(KEYWORD_1, AMOUNT_1... KEYWORD_N, AMOUNT_N). 
+       * Where: 
+			TOTAL_AMOUNT_OF_VISITORS - SUM all VISITORS and ATTENDEES found for this KEYWORD DAY CITY combination;
+			TOKEN_MAP(KEYWORD_1, AMOUNT_1... KEYWORD_10, AMOUNT_10) – tokenized and aggregated descriptions for 
+			all events and places (total world count of all descriptions, like you do in HW1 top 10 keywords)
+	   *-------------------------------------------------------------------------------------------------------------
+       */
         
        /*
         *  Get a sequence of all unique tags from the file.
@@ -251,11 +257,48 @@ public class SparkUniqueWords {
         });
         
         
+        /*
+         * ----------------------------------------------------------------------------------------------------------------------
+         * 	3. Collect all the attendees and visitors of this events by name with amount of occurrences
+         * ----------------------------------------------------------------------------------------------------------------------
+         */
+        JavaRDD<EventEntity> eventsWithAttendees = allEventsRdd.map(eventEntity -> {
+        	Connection<User> conAttendees = facebookClient.fetchConnection(eventEntity.getId() + "/attending", User.class, Parameter.with("limit", 500));
+        	List<AttendeeData> attendeesResult = new ArrayList<AttendeeData>();
+        	for (List<User> users : conAttendees) {
+        		System.out.println("Attendees list size: " + users.size());
+        		for (User user : users) {
+        			AttendeeData attendee = new AttendeeData(user.getId(), user.getName());
+        			attendeesResult.add(attendee);
+        		}
+        	}
+        	eventEntity.setAttendees(attendeesResult);
+        	return eventEntity;
+        });
+        
+        // Get all  attendees
+        JavaRDD<AttendeeData> attendeesRDD = eventsWithAttendees.flatMap(eventEntity -> eventEntity.getAttendees().iterator());
+        
+        JavaPairRDD<AttendeeData, Integer> attendesPairs = attendeesRDD.mapToPair(eventEntity -> new Tuple2<>(eventEntity, 1));
+        
+        JavaPairRDD<AttendeeData, Integer> attendesCounts = attendesPairs.reduceByKey((n1, n2) -> n1 + n2);
+        
+		JavaRDD<AttendeeData> attendeesResult = attendesCounts.map(tuple -> {
+			tuple._1().setCount(tuple._2());
+			return tuple._1();
+		});
+		
+		// Get sorted result according amount of attendees.
+		JavaRDD<AttendeeData> sortedAttendees = attendeesResult.sortBy(item -> item.getCount(), false, 1);
+		
+		Dataset<Row> attendeesDf = spark.createDataFrame(sortedAttendees, AttendeeData.class);
+		attendeesDf.createOrReplaceTempView("attendees");
+        System.out.println("---------------------------- ATTENDEES  -----------------------------------------");
+        attendeesDf.show(15);
+
         spark.stop();
 	  }
 
-	
-	
 	/*
 	 * Return a map (word, count).
 	 */
