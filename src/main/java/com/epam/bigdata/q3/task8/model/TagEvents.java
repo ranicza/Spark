@@ -3,17 +3,17 @@ package com.epam.bigdata.q3.task8.model;
 import java.io.Serializable;
 import java.util.List;
 
-public class TagEventsEntity implements Serializable{
+public class TagEvents implements Serializable{
 	
 	private String tag;
 	
-    private List<EventEntity> events;
+    private List<EventData> events;
 
-	public TagEventsEntity() {
+	public TagEvents() {
 		super();
 	}
 
-	public TagEventsEntity(String tag, List<EventEntity> events) {
+	public TagEvents(String tag, List<EventData> events) {
 		super();
 		this.tag = tag;
 		this.events = events;
@@ -27,11 +27,11 @@ public class TagEventsEntity implements Serializable{
 		this.tag = tag;
 	}
 
-	public List<EventEntity> getEvents() {
+	public List<EventData> getEvents() {
 		return events;
 	}
 
-	public void setEvents(List<EventEntity> events) {
+	public void setEvents(List<EventData> events) {
 		this.events = events;
 	}
 
@@ -52,7 +52,7 @@ public class TagEventsEntity implements Serializable{
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		TagEventsEntity other = (TagEventsEntity) obj;
+		TagEvents other = (TagEvents) obj;
 		if (events == null) {
 			if (other.events != null)
 				return false;

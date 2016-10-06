@@ -7,11 +7,11 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.SparkSession;
 
-import com.epam.bigdata.q3.task8.model.DateCityEntity;
-import com.epam.bigdata.q3.task8.model.DateCityTagEntity;
-import com.epam.bigdata.q3.task8.model.EventEntity;
-import com.epam.bigdata.q3.task8.model.TagEventsEntity;
-import com.epam.bigdata.q3.task8.model.ULogEntity;
+import com.epam.bigdata.q3.task8.model.DateCity;
+import com.epam.bigdata.q3.task8.model.DateCityTag;
+import com.epam.bigdata.q3.task8.model.EventData;
+import com.epam.bigdata.q3.task8.model.TagEvents;
+import com.epam.bigdata.q3.task8.model.LogData;
 import com.epam.bigdata.q3.task8.model.AttendeeData;
 import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
@@ -20,10 +20,6 @@ import com.restfb.Parameter;
 import com.restfb.Version;
 import com.restfb.types.Event;
 import com.restfb.types.User;
-
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.Function2;
-import org.apache.spark.api.java.function.PairFunction;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -109,15 +105,15 @@ public class SparkUniqueWords {
          * ----------------------- GET LOGS + TAGS + CITIES + DATE ------------------------
          * map(Function<T,R> f) 
          */
-        JavaRDD<ULogEntity> logsRdd = spark.read().textFile(logFile).javaRDD().map(line -> {              
+        JavaRDD<LogData> logsRdd = spark.read().textFile(logFile).javaRDD().map(line -> {              
                 String[] parts = line.split(SPLIT);             
                 List<String> tags = tagsMap.get(Long.parseLong(parts[parts.length-2]));
                 String city = citiesMap.get(Long.parseLong(parts[parts.length-15]));
                 String date = parts[1].substring(0,8);             
-                return new ULogEntity(Long.parseLong(parts[parts.length-2]), Long.parseLong(parts[parts.length-15]), date, tags, city);
+                return new LogData(Long.parseLong(parts[parts.length-2]), Long.parseLong(parts[parts.length-15]), date, tags, city);
         });
 
-        Dataset<Row> df = spark.createDataFrame(logsRdd, ULogEntity.class);
+        Dataset<Row> df = spark.createDataFrame(logsRdd, LogData.class);
         df.createOrReplaceTempView("logs");
         df.limit(15).show();
 
@@ -127,9 +123,9 @@ public class SparkUniqueWords {
          *  RDDs of key-value pairs are represented by the JavaPairRDD class. 
          *  mapToPair(PairFunction<T,K2,V2> f) 
          */
-        JavaPairRDD<DateCityEntity, Set<String>> dateCityTags = logsRdd.mapToPair(log-> {
-       	 DateCityEntity dc = new DateCityEntity(log.getTimestampDate(), log.getCity());
-            return new Tuple2<DateCityEntity, Set<String>>(dc, new HashSet<String>(log.getTags()));
+        JavaPairRDD<DateCity, Set<String>> dateCityTags = logsRdd.mapToPair(log-> {
+       	 DateCity dc = new DateCity(log.getTimestampDate(), log.getCity());
+            return new Tuple2<DateCity, Set<String>>(dc, new HashSet<String>(log.getTags()));
        });
 
         /*
@@ -139,13 +135,13 @@ public class SparkUniqueWords {
 		 *  results to a reducer, similarly to a "combiner" in MapReduce.
 		 *  Output will be hash-partitioned with the existing partitioner/ parallelism level.
          */
-        JavaPairRDD<DateCityEntity, Set<String>> dateCityTagsPairs = dateCityTags.reduceByKey((set1, set2) -> {
+        JavaPairRDD<DateCity, Set<String>> dateCityTagsPairs = dateCityTags.reduceByKey((set1, set2) -> {
                 set1.addAll(set2);
                 return set1;
         });
         
         System.out.println("-----------------------UNIQUE KEYWORDS PER DATE/CITY----------------------------");
-        for (Tuple2<DateCityEntity, Set<String>> tuple : dateCityTagsPairs.collect()) {
+        for (Tuple2<DateCity, Set<String>> tuple : dateCityTagsPairs.collect()) {
             System.out.println("CITY: " + tuple._1().getCity() + " DATE: " + tuple._1().getDate() + " TAGS: ");
             if (tuple._2 != null) {
                 for (String tag : tuple._2()) {
@@ -180,15 +176,15 @@ public class SparkUniqueWords {
        * Get events according tag.  
        * map(Function<T,R> f) 
        */
-       JavaRDD<TagEventsEntity> tagsEventsRDD = uniqueTagsRdd.map(tag -> {
+       JavaRDD<TagEvents> tagsEventsRDD = uniqueTagsRdd.map(tag -> {
 				Connection<Event> con = facebookClient.fetchConnection("search", Event.class, Parameter.with("q", tag), 
 						Parameter.with("type", "event"), Parameter.with("fields", "id,attending_count,place,name,description,start_time"));
 				
-				List<EventEntity> eventsByTag = new ArrayList<EventEntity>();
+				List<EventData> eventsByTag = new ArrayList<EventData>();
 				for (List<Event> events : con) {
 					 for (Event event : events) {
 						 if (event != null) {
-							 EventEntity eventEntity = new EventEntity(event.getDescription(), event.getId(), event.getName(), event.getAttendingCount(), tag);
+							 EventData eventEntity = new EventData(event.getDescription(), event.getId(), event.getName(), event.getAttendingCount(), tag);
 							 
 							 if (event.getPlace() != null && event.getPlace().getLocation() != null && event.getPlace().getLocation().getCity() != null) {
 								 eventEntity.setCity(event.getPlace().getLocation().getCity());
@@ -212,26 +208,26 @@ public class SparkUniqueWords {
 						 }
 					 }
 				}
-               TagEventsEntity tagEvents = new TagEventsEntity(tag, eventsByTag);
+               TagEvents tagEvents = new TagEvents(tag, eventsByTag);
                System.out.println("TAG: " + tag +  " , amount of events: " + eventsByTag.size());
 				return tagEvents;     	
 		});
        
 
        // Get all events
-        JavaRDD<EventEntity> allEventsRdd = tagsEventsRDD.flatMap(tagEvents ->
+        JavaRDD<EventData> allEventsRdd = tagsEventsRDD.flatMap(tagEvents ->
         	tagEvents.getEvents().iterator()
         );
 
-        JavaPairRDD<DateCityTagEntity, EventEntity> dateCityTagsByPairs = allEventsRdd.mapToPair(eventEntity -> {
-        	DateCityTagEntity dctEntity = new DateCityTagEntity(eventEntity.getStartDate(), eventEntity.getCity(), eventEntity.getTag());
-        	 return new Tuple2<DateCityTagEntity, EventEntity>(dctEntity, eventEntity);
+        JavaPairRDD<DateCityTag, EventData> dateCityTagsByPairs = allEventsRdd.mapToPair(eventEntity -> {
+        	DateCityTag dctEntity = new DateCityTag(eventEntity.getStartDate(), eventEntity.getCity(), eventEntity.getTag());
+        	 return new Tuple2<DateCityTag, EventData>(dctEntity, eventEntity);
         	}
         );
         
        
-        JavaPairRDD<DateCityTagEntity, EventEntity> dctPairs = dateCityTagsByPairs.reduceByKey((event1, event2) -> {
-        	EventEntity eventEntity = new EventEntity();    
+        JavaPairRDD<DateCityTag, EventData> dctPairs = dateCityTagsByPairs.reduceByKey((event1, event2) -> {
+        	EventData eventEntity = new EventData();    
         	// collect all the attendees  
         	eventEntity.setAttendingCount(event1.getAttendingCount() + event2.getAttendingCount());
         	// word count of all descriptions
@@ -259,14 +255,13 @@ public class SparkUniqueWords {
         
         /*
          * ----------------------------------------------------------------------------------------------------------------------
-         * 	3. Collect all the attendees and visitors of this events by name with amount of occurrences
+         * 	3. Collect all the attendees and visitors of this events with amount of occurrences
          * ----------------------------------------------------------------------------------------------------------------------
          */
-        JavaRDD<EventEntity> eventsWithAttendees = allEventsRdd.map(eventEntity -> {
+        JavaRDD<EventData> eventsWithAttendees = allEventsRdd.map(eventEntity -> {
         	Connection<User> conAttendees = facebookClient.fetchConnection(eventEntity.getId() + "/attending", User.class, Parameter.with("limit", 500));
         	List<AttendeeData> attendeesResult = new ArrayList<AttendeeData>();
         	for (List<User> users : conAttendees) {
-        		System.out.println("Attendees list size: " + users.size());
         		for (User user : users) {
         			AttendeeData attendee = new AttendeeData(user.getId(), user.getName());
         			attendeesResult.add(attendee);

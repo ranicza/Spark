@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-public class ULogEntity implements Serializable{
+public class LogData implements Serializable{
 
 	private long  IDUserTags;
 	
@@ -16,10 +16,10 @@ public class ULogEntity implements Serializable{
 	
     private String city;
 
-	public ULogEntity() {
+	public LogData() {
 	}
 
-	public ULogEntity(long iDUserTags, long iDCity, String timestampDate, List<String> tags, String city) {
+	public LogData(long iDUserTags, long iDCity, String timestampDate, List<String> tags, String city) {
 		super();
 		IDUserTags = iDUserTags;
 		IDCity = iDCity;

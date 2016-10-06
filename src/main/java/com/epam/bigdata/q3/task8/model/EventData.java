@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class EventEntity implements Serializable{
+public class EventData implements Serializable{
 
 	private String description;
 	
@@ -29,13 +29,13 @@ public class EventEntity implements Serializable{
 	
 	private List<String> wordsFromDescription = new ArrayList<String>(); 
 	
-	public EventEntity() {
+	public EventData() {
 		super();
 	}
 
 	
 	
-public EventEntity(String description, String id, String name, int attendingCount, String tag) {
+public EventData(String description, String id, String name, int attendingCount, String tag) {
 		super();
 		this.description = description;
 		this.id = id;
