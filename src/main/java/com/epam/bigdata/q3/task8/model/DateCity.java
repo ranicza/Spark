@@ -38,17 +38,18 @@ public class DateCity implements Serializable{
 		this.city = city;
 	}
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        DateCity dc = (DateCity) o;
+        DateCity test = (DateCity) o;
 
-        if (!getDate().equals(dc.getDate())) return false;
-        return getCity().equals(dc.getCity());
+        if (date != null ? !date.equals(test.date) : test.date != null) return false;
+        return city != null ? city.equals(test.city) : test.city == null;
+
     }
+
 
     @Override
     public int hashCode() {

@@ -249,7 +249,7 @@ public class SparkUniqueWords {
         });
         
         dctPairs.collect().forEach(tuple -> {
-        	System.out.println("KEYWORD: " + tuple._1().getTag() + " DATE: " + tuple._1().getDate() + " CITY: " + tuple._1().getCity() + "VISITORS : " + tuple._2.getAttendingCount());
+        	System.out.println("KEYWORD: " + tuple._1().getTag() + " DATE: " + tuple._1().getDate() + " CITY: " + tuple._1().getCity() + "  VISITORS : " + tuple._2.getAttendingCount());
         	
         	Map<String, Integer> outputWords = tuple._2.getCountedWords().entrySet().stream()
                     .sorted(Map.Entry.comparingByValue(java.util.Comparator.reverseOrder())).limit(10)
