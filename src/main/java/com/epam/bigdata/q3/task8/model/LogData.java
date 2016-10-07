@@ -68,12 +68,34 @@ public class LogData implements Serializable{
 		this.city = city;
 	}
 
+	/*
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LogData test = (LogData) o;
+
+        if (getIDUserTags() != test.getIDUserTags()) return false;
+        if (getIDCity() != test.getIDCity()) return false;
+        if (!getTimestampDate().equals(test.getTimestampDate())) return false;
+        return getCity().equals(test.getCity());
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (getIDUserTags() ^ (getIDUserTags() >>> 32));
+        result = 31 * result + (int) (getIDCity() ^ (getIDCity() >>> 32));
+        result = 31 * result + getTimestampDate().hashCode();
+        result = 31 * result + getCity().hashCode();
+        return result;
+    }
+    */
+    
 	@Override
 	public String toString() {
 		return "ULogEntity [IDUserTags=" + IDUserTags + ", IDCity=" + IDCity + ", timestampDate=" + timestampDate + "]";
 	}
 
-
-
-	
 }

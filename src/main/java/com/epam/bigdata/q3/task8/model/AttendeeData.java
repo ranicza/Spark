@@ -13,17 +13,13 @@ public class AttendeeData implements Serializable{
 	public AttendeeData() {
 		super();
 	}
-	
-	
 
 	public AttendeeData(String id, String name) {
 		super();
 		this.id = id;
 		this.name = name;
 	}
-
-
-
+	
 	public String getId() {
 		return id;
 	}
@@ -48,8 +44,30 @@ public class AttendeeData implements Serializable{
 		this.count = count;
 	}
     
-    
-    
-    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AttendeeData test = (AttendeeData) o;
+
+        if (getCount() != test.getCount()) return false;
+        if (!getId().equals(test.getId())) return false;
+        return getName().equals(test.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getId().hashCode();
+        result = 31 * result + getName().hashCode();
+        result = 31 * result + getCount();
+        return result;
+    }
+
+	@Override
+	public String toString() {
+		return "AttendeeData [id=" + id + ", name=" + name + ", count=" + count + "]";
+	}
+   
     
 }

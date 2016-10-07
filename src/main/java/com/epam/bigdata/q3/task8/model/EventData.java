@@ -7,35 +7,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class EventData implements Serializable{
+public class EventData implements Serializable {
 
 	private String description;
-	
+
 	private String id;
-	
+
 	private String city;
-	
+
 	private String startDate;
-	
+
 	private String name;
-	
-    private int attendingCount;
-    
-    private List<AttendeeData> attendees;
+
+	private int attendingCount;
+
+	private List<AttendeeData> attendees;
 
 	private String tag;
-	
-    private Map<String, Integer> countedWords = new HashMap<String, Integer>();
-	
-	private List<String> wordsFromDescription = new ArrayList<String>(); 
-	
+
+	private Map<String, Integer> countedWords = new HashMap<String, Integer>();
+
+	private List<String> wordsFromDescription = new ArrayList<String>();
+
 	public EventData() {
 		super();
 	}
 
-	
-	
-public EventData(String description, String id, String name, int attendingCount, String tag) {
+	public EventData(String description, String id, String name, int attendingCount, String tag) {
 		super();
 		this.description = description;
 		this.id = id;
@@ -108,29 +106,56 @@ public EventData(String description, String id, String name, int attendingCount,
 		this.countedWords = countedWords;
 	}
 
-
-
 	public List<AttendeeData> getAttendees() {
 		return attendees;
 	}
-
-
 
 	public void setAttendees(List<AttendeeData> attendees) {
 		this.attendees = attendees;
 	}
 
-
-
 	public int getAttendingCount() {
 		return attendingCount;
 	}
 
-
-
 	public void setAttendingCount(int attendingCount) {
 		this.attendingCount = attendingCount;
 	}
+	
+	/*
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        EventData test = (EventData) o;
+
+        if (!getDescription().equals(test.getDescription())) return false;
+        if (!getId().equals(test.getId())) return false;
+        if (!getCity().equals(test.getCity())) return false;
+        if (!getStartDate().equals(test.getStartDate())) return false;
+        if (!getName().equals(test.getName())) return false;
+        return getTag().equals(test.getTag());
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getDescription().hashCode();
+        result = 31 * result + getId().hashCode();
+        result = 31 * result + getCity().hashCode();
+        result = 31 * result + getStartDate().hashCode();
+        result = 31 * result + getName().hashCode();
+        result = 31 * result + getTag().hashCode();
+        return result;
+    }
+
+*/
+	@Override
+	public String toString() {
+		return "EventData [description=" + description + ", id=" + id + ", city=" + city + ", startDate=" + startDate
+				+ ", name=" + name + ", attendees=" + attendees + ", tag=" + tag + "]";
+	}
+    
 
 }

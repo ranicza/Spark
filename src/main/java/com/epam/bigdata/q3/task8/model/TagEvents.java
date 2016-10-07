@@ -35,36 +35,26 @@ public class TagEvents implements Serializable{
 		this.events = events;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((events == null) ? 0 : events.hashCode());
-		result = prime * result + ((tag == null) ? 0 : tag.hashCode());
-		return result;
-	}
+	/*
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TagEvents other = (TagEvents) obj;
-		if (events == null) {
-			if (other.events != null)
-				return false;
-		} else if (!events.equals(other.events))
-			return false;
-		if (tag == null) {
-			if (other.tag != null)
-				return false;
-		} else if (!tag.equals(other.tag))
-			return false;
-		return true;
-	}
+        TagEvents test = (TagEvents) o;
+
+        if (!getTag().equals(test.getTag())) return false;
+        return getEvents().equals(test.getEvents());
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getTag().hashCode();
+        result = 31 * result + getEvents().hashCode();
+        return result;
+    }
+    */
 
 	@Override
 	public String toString() {

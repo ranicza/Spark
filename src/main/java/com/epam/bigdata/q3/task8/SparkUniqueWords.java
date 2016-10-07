@@ -39,6 +39,18 @@ import org.apache.spark.sql.Row;
 public class SparkUniqueWords {
 	private static final String SPLIT = "\\s+";
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("mm.dd.yyyy");
+	private static final String SEARCH = "search";
+	private static final String KEY = "q";
+	private static final String TYPE = "type";
+	private static final String EVENT = "event";
+	private static final String FIELDS = "fields";
+	private static final String PARAMS = "id,attending_count,place,name,description,start_time";
+	
+	
+	private static final String UNDEFINED = "undefined";
+	private static final String DEFAULT_DATE = "2016-10-05";
+	private static final String LIMIT = "limit";
+	private static final String ATTENDING ="/attending";
 	
 	private static final String TOKEN = "EAACEdEose0cBAHZA71ARiJpgdwMsAkZA5ZCYZCa5quP6A1qZBrZCCTI3HAujeZAsxvmBg3JMLZAGSwewkg7COU0WnwVhZBiBM9RGYrhOWVfUCPKaT55d0wp1jYdPO5arflcgzYIKvlxvLOeuehovv4ZAvPZCZBGKCMHIc5cYZAPlHZCnTY3ECeYBKe2rpq";
 	private static final FacebookClient facebookClient = new DefaultFacebookClient(TOKEN, Version.VERSION_2_5);
@@ -176,8 +188,8 @@ public class SparkUniqueWords {
        * map(Function<T,R> f) 
        */
        JavaRDD<TagEvents> tagsEventsRDD = uniqueTagsRdd.map(tag -> {
-				Connection<Event> con = facebookClient.fetchConnection("search", Event.class, Parameter.with("q", tag), 
-						Parameter.with("type", "event"), Parameter.with("fields", "id,attending_count,place,name,description,start_time"));
+				Connection<Event> con = facebookClient.fetchConnection(SEARCH, Event.class, Parameter.with(KEY, tag), 
+						Parameter.with(TYPE, EVENT), Parameter.with(FIELDS, PARAMS));
 				
 				List<EventData> eventsByTag = new ArrayList<EventData>();
 				for (List<Event> events : con) {
@@ -188,12 +200,12 @@ public class SparkUniqueWords {
 							 if (event.getPlace() != null && event.getPlace().getLocation() != null && event.getPlace().getLocation().getCity() != null) {
 								 eventEntity.setCity(event.getPlace().getLocation().getCity());
 	                         } else {
-	                        	 eventEntity.setCity("undefined");
+	                        	 eventEntity.setCity(UNDEFINED);
 	                         }
 	                            if (event.getStartTime() != null) {
 	                            	eventEntity.setStartDate(dateFormatter.format(event.getStartTime()).toString());
 	                            } else {
-	                            	eventEntity.setStartDate("2016-10-05");
+	                            	eventEntity.setStartDate(DEFAULT_DATE);
 	                            }
 							 
 	                            // Get words from event's description
@@ -256,7 +268,7 @@ public class SparkUniqueWords {
          * ----------------------------------------------------------------------------------------------------------------------
          */
         JavaRDD<EventData> eventsWithAttendees = allEventsRdd.map(eventEntity -> {
-        	Connection<User> conAttendees = facebookClient.fetchConnection(eventEntity.getId() + "/attending", User.class, Parameter.with("limit", 500));
+        	Connection<User> conAttendees = facebookClient.fetchConnection(eventEntity.getId() + ATTENDING, User.class, Parameter.with(LIMIT, 500));
         	List<AttendeeData> attendeesResult = new ArrayList<AttendeeData>();
         	for (List<User> users : conAttendees) {
         		for (User user : users) {

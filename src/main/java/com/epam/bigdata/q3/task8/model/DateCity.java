@@ -38,44 +38,27 @@ public class DateCity implements Serializable{
 		this.city = city;
 	}
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((city == null) ? 0 : city.hashCode());
-		result = prime * result + ((date == null) ? 0 : date.hashCode());
-		return result;
-	}
+        DateCity dc = (DateCity) o;
 
+        if (!getDate().equals(dc.getDate())) return false;
+        return getCity().equals(dc.getCity());
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		DateCity other = (DateCity) obj;
-		if (city == null) {
-			if (other.city != null)
-				return false;
-		} else if (!city.equals(other.city))
-			return false;
-		if (date == null) {
-			if (other.date != null)
-				return false;
-		} else if (!date.equals(other.date))
-			return false;
-		return true;
-	}
-
-
+    @Override
+    public int hashCode() {
+        int result = getDate().hashCode();
+        result = 31 * result + getCity().hashCode();
+        return result;
+    }
+    
 	@Override
 	public String toString() {
 		return "DateCity [date=" + date + ", city=" + city + "]";
 	}
-    
-    
+   
 }
