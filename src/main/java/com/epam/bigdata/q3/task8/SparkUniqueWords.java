@@ -124,7 +124,8 @@ public class SparkUniqueWords {
                 String date = parts[1].substring(0,8);             
                 return new LogData(Long.parseLong(parts[parts.length-2]), Long.parseLong(parts[parts.length-15]), date, tags, city);
         });
-
+        logsRdd.cache();
+        
         Dataset<Row> df = spark.createDataFrame(logsRdd, LogData.class);
         df.createOrReplaceTempView("logs");
         df.limit(15).show();
@@ -248,8 +249,7 @@ public class SparkUniqueWords {
         });
         
         dctPairs.collect().forEach(tuple -> {
-        	System.out.println("KEYWORD: " + tuple._1().getTag() + " DATE: " + tuple._1().getDate() + " CITY: " + tuple._1().getCity());
-        	System.out.println("TOTAL_AMOUNT_OF_VISITORS : " + tuple._2.getAttendingCount());
+        	System.out.println("KEYWORD: " + tuple._1().getTag() + " DATE: " + tuple._1().getDate() + " CITY: " + tuple._1().getCity() + "VISITORS : " + tuple._2.getAttendingCount());
         	
         	Map<String, Integer> outputWords = tuple._2.getCountedWords().entrySet().stream()
                     .sorted(Map.Entry.comparingByValue(java.util.Comparator.reverseOrder())).limit(10)
