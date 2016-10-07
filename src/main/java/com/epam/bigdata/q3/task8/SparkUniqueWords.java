@@ -21,7 +21,6 @@ import com.restfb.Version;
 import com.restfb.types.Event;
 import com.restfb.types.User;
 
-import org.apache.spark.serializer.KryoRegistrator;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
