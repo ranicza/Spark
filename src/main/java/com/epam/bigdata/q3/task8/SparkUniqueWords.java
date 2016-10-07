@@ -21,6 +21,8 @@ import com.restfb.Version;
 import com.restfb.types.Event;
 import com.restfb.types.User;
 
+import org.apache.spark.serializer.KryoRegistrator;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,7 +71,8 @@ public class SparkUniqueWords {
 	    
 	    SparkSession spark = SparkSession
 	    	      .builder()
-	    	      .appName("SparkUniqueWords")
+	    	      .appName("SparkUniqueWords").config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+	    	      .config("spark.kryo.registrator", AppKryoRegistrator.class.getName())
 	    	      .getOrCreate();
 
 	    /*
