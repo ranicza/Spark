@@ -54,7 +54,7 @@ public class SparkUniqueWords {
 	private static final String LIMIT = "limit";
 	private static final String ATTENDING ="/attending";
 	
-	private static final String TOKEN = "EAACEdEose0cBAJBwYGYTnoeNibjFHUkiBLLJssjclr7ce2OVcZBcOr7d3fwuHZAvMvll0gWOOFpbs28pTCFW0BR4D1IqYrziD2vGgdEgd4LsmC2r5ZBZC5EfcNKRmPtaMUqYb63kFQTZBZAoPx1UZA4KLeFUVjkIpIfnxCLvynhFRyP3xRGWdcA";
+	private static final String TOKEN = "EAACEdEose0cBAPv5MfjZBiogZCndV0zoelxuHgw9H6Vz8luYmAs8BFEsBsjGlEqWIEInut2R9SFEnIAnSXbCZBidRdNObVsiPt00aFNLnUeo8NsLlwZA1f9iABhXP6P0ogMHdul9CRJzAX83cCnZC04hjmZC1JMRPra4IINaJzlq0uYCE4cKdW";
 	private static final FacebookClient facebookClient = new DefaultFacebookClient(TOKEN, Version.VERSION_2_5);
     
     
