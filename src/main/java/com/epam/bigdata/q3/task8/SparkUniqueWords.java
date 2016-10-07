@@ -140,7 +140,6 @@ public class SparkUniqueWords {
                 return set1;
         });
         
-        System.out.println("-----------------------UNIQUE KEYWORDS PER DATE/CITY----------------------------");
         for (Tuple2<DateCity, Set<String>> tuple : dateCityTagsPairs.collect()) {
             System.out.println("CITY: " + tuple._1().getCity() + " DATE: " + tuple._1().getDate() + " TAGS: ");
             if (tuple._2 != null) {
@@ -235,8 +234,6 @@ public class SparkUniqueWords {
         	eventEntity.setCountedWords(map);	
         	return eventEntity;
         });
-
-        System.out.println("---- KEYWORD DAY CITY TOTAL_AMOUNT_OF_VISITORS TOKEN_MAP(KEYWORD_1, AMOUNT_1... KEYWORD_N, AMOUNT_N) ----");
         
         dctPairs.collect().forEach(tuple -> {
         	System.out.println("KEYWORD: " + tuple._1().getTag() + " DATE: " + tuple._1().getDate() + " CITY: " + tuple._1().getCity());
@@ -288,7 +285,6 @@ public class SparkUniqueWords {
 		
 		Dataset<Row> attendeesDf = spark.createDataFrame(sortedAttendees, AttendeeData.class);
 		attendeesDf.createOrReplaceTempView("attendees");
-        System.out.println("---------------------------- ATTENDEES  -----------------------------------------");
         attendeesDf.show(15);
 
         spark.stop();
