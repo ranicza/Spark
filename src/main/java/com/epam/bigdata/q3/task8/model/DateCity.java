@@ -38,6 +38,7 @@ public class DateCity implements Serializable{
 		this.city = city;
 	}
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -51,14 +52,16 @@ public class DateCity implements Serializable{
 
     @Override
     public int hashCode() {
-        int result = getDate().hashCode();
-        result = 31 * result + getCity().hashCode();
+        int result = ((date == null) ? 0 : date.hashCode());
+        result = 31 * result + ((city == null) ? 0 : city.hashCode());
         return result;
     }
-    
+
 	@Override
 	public String toString() {
 		return "DateCity [date=" + date + ", city=" + city + "]";
 	}
+
+
    
 }

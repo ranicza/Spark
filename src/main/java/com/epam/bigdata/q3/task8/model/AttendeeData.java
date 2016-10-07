@@ -43,7 +43,7 @@ public class AttendeeData implements Serializable{
 	public void setCount(int count) {
 		this.count = count;
 	}
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -58,9 +58,9 @@ public class AttendeeData implements Serializable{
 
     @Override
     public int hashCode() {
-        int result = getId().hashCode();
-        result = 31 * result + getName().hashCode();
-        result = 31 * result + getCount();
+        int result = ((id == null) ? 0 : id.hashCode());
+        result = 31 * result + ((name == null) ? 0 : name.hashCode());
+        result = 31 * result + count;
         return result;
     }
 
@@ -68,6 +68,5 @@ public class AttendeeData implements Serializable{
 	public String toString() {
 		return "AttendeeData [id=" + id + ", name=" + name + ", count=" + count + "]";
 	}
-   
-    
+
 }

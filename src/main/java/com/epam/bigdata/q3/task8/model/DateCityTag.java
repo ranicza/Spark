@@ -45,6 +45,7 @@ public class DateCityTag implements Serializable{
 		this.tag = tag;
 	}
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -60,17 +61,16 @@ public class DateCityTag implements Serializable{
 
     @Override
     public int hashCode() {
-        int result = getDate().hashCode();
-        result = 31 * result + getCity().hashCode();
-        result = 31 * result + getTag().hashCode();
+        int result = ((date == null) ? 0 : date.hashCode());
+        result = 31 * result + ((city == null) ? 0 : city.hashCode());
+        result = 31 * result + ((tag == null) ? 0 : tag.hashCode());
         return result;
     }
 
+	
 	@Override
 	public String toString() {
 		return "DateCiteTagEntity [date=" + date + ", city=" + city + ", tag=" + tag + "]";
 	}
-    
-    
-    
+ 
 }
